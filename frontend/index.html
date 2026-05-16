@@ -594,7 +594,7 @@
   </div>
 
   <script>
-    const API = "https://smartlib-p0j7.onrender.com";
+    const API = "https://smartlib-p0j7.onrender.com".replace(/\/$/, "");
     let SESSION = localStorage.getItem("chat_session");
     if (!SESSION) {
       SESSION = "user_" + Math.random().toString(36).slice(2, 9);
@@ -696,7 +696,7 @@
 
       } catch (e) {
         removeTyping();
-        addBotMsg("⚠️ Không thể kết nối server. Hãy đảm bảo backend đang chạy tại **localhost:8001**.\n\n`python main.py` trong thư mục `backend`.");
+        addBotMsg("⚠️ Lỗi kết nối tới Server: " + e.message);
       }
     }
 
