@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartLib AI — Trợ Lý Thư Viện</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif
+    }
+
+    :root {
+      --primary: #06b6d4;
+      --primary-dark: #0891b2;
+      --bg1: #020617;
+      --bg2: #0f172a;
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-b: rgba(255, 255, 255, 0.07);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --success: #22c55e
+    }
+
+    body {
+      background: radial-gradient(circle at top right, #1e293b, var(--bg1) 70%);
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      color: var(--text);
+      overflow: hidden
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 260px;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--glass-b);
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      flex-shrink: 0
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--glass-b)
+    }
+
+    .logo-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--primary), #3b82f6);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3)
+    }
+
+    .logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(to right, #22d3ee, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent
+    }
+
+    .sidebar-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-bottom: 10px
+    }
+
+    .history-item {
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: .2s;
+      font-size: 13px;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 3px
+    }
+
+    .history-item:hover {
+      background: var(--glass);
+      color: #fff
+    }
+
+    .history-item i {
+      width: 16px;
+      opacity: .6
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid var(--glass-b)
+    }
+
+    .info-badge {
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: #7dd3fc
+    }
+
+    .info-badge p {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px
+    }
+
+    /* ===== NEW CHAT BTN ===== */
+    .new-chat-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, var(--primary), #3b82f6);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      margin-bottom: 24px;
+      transition: .25s;
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2)
+    }
+
+    .new-chat-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
+      filter: brightness(1.1)
+    }
+
+    .new-chat-btn i {
+      font-size: 16px
+    }
+
+    /* ===== MAIN ===== */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden
+    }
+
+    .header {
+      padding: 16px 32px;
+      border-bottom: 1px solid var(--glass-b);
+      background: rgba(13, 15, 26, .6);
+      backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .header-title h1 {
+      font-size: 15px;
+      font-weight: 600
+    }
+
+    .header-title p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--success)
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      background: var(--success);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--success);
+      animation: pulse 2s infinite
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .4
+      }
+    }
+
+    /* ===== MESSAGES ===== */
+    .messages {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      scroll-behavior: smooth
+    }
+
+    .messages::-webkit-scrollbar {
+      width: 8px
+    }
+
+    .messages::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    .messages::-webkit-scrollbar-thumb {
+      background: rgba(6, 182, 212, .25);
+      border-radius: 8px
+    }
+
+    .messages::-webkit-scrollbar-thumb:hover {
+      background: rgba(6, 182, 212, .5)
+    }
+
+    .msg {
+      display: flex;
+      gap: 12px;
+      animation: fadeUp .3s ease
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .msg.user {
+      flex-direction: row-reverse
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0
+    }
+
+    .msg.bot .avatar {
+      background: linear-gradient(135deg, var(--primary), #3b82f6)
+    }
+
+    .msg.user .avatar {
+      background: #475569
+    }
+
+    .bubble {
+      max-width: 70%;
+      padding: 13px 17px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.65
+    }
+
+    .msg.bot .bubble {
+      background: var(--glass);
+      border: 1px solid var(--glass-b);
+      border-bottom-left-radius: 4px
+    }
+
+    .msg.user .bubble {
+      background: var(--primary);
+      border-bottom-right-radius: 4px
+    }
+
+    .bubble strong {
+      font-weight: 600
+    }
+
+    /* ===== CARDS ===== */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+      width: 100%
+    }
+
+    .card {
+      background: rgba(255, 255, 255, .03);
+      border: 1px solid var(--glass-b);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: .25s;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      background: rgba(255, 255, 255, .06);
+      border-color: rgba(6, 182, 212, .5);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .3)
+    }
+
+    .card-type {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--primary);
+      font-weight: 600
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.5
+    }
+
+    .card-author {
+      font-size: 11px;
+      color: var(--muted);
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden
+    }
+
+    .card-abstract {
+      font-size: 11px;
+      color: #94a3b8;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.5
+    }
+
+    .card-btn {
+      margin-top: auto;
+      text-align: center;
+      padding: 7px;
+      border-radius: 7px;
+      font-size: 12px;
+      background: rgba(6, 182, 212, 0.1);
+      color: #22d3ee;
+      font-weight: 500;
+      transition: .2s
+    }
+
+    .card:hover .card-btn {
+      background: var(--primary);
+      color: #fff
+    }
+
+    /* ===== TYPING ===== */
+    .typing {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      padding: 14px 18px
+    }
+
+    .typing span {
+      width: 6px;
+      height: 6px;
+      background: var(--muted);
+      border-radius: 50%;
+      animation: bounce .9s infinite
+    }
+
+    .typing span:nth-child(2) {
+      animation-delay: .15s
+    }
+
+    .typing span:nth-child(3) {
+      animation-delay: .3s
+    }
+
+    @keyframes bounce {
+
+      0%,
+      60%,
+      100% {
+        transform: translateY(0)
+      }
+
+      30% {
+        transform: translateY(-6px)
+      }
+    }
+
+    /* ===== QUICK CHIPS ===== */
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0 32px 12px;
+      flex-shrink: 0
+    }
+
+    .chip {
+      padding: 7px 14px;
+      border-radius: 20px;
+      background: var(--glass);
+      border: 1px solid var(--glass-b);
+      font-size: 12px;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: .2s
+    }
+
+    .chip:hover {
+      background: rgba(6, 182, 212, 0.15);
+      border-color: rgba(6, 182, 212, 0.4);
+      color: #7dd3fc
+    }
+
+    /* ===== INPUT ===== */
+    .input-area {
+      padding: 16px 32px 24px;
+      flex-shrink: 0
+    }
+
+    .input-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid var(--glass-b);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      padding: 6px 6px 6px 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, .3);
+      transition: .2s
+    }
+
+    .input-wrap:focus-within {
+      border-color: rgba(6, 182, 212, .5);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, .4), 0 0 0 3px rgba(6, 182, 212, 0.1)
+    }
+
+    .input-wrap input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 15px;
+      padding: 8px 0
+    }
+
+    .input-wrap input::placeholder {
+      color: var(--muted)
+    }
+
+    .send-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: var(--primary);
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      font-size: 15px;
+      transition: .2s;
+      flex-shrink: 0
+    }
+
+    .send-btn:hover {
+      background: var(--primary-dark);
+      transform: scale(1.05)
+    }
+
+    .send-btn:disabled {
+      background: #334155;
+      cursor: not-allowed;
+      transform: none
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">📚</div>
+      <span class="logo-text">SmartLib AI</span>
+    </div>
+
+    <button class="new-chat-btn" onclick="createNewChat()">
+      <i class="fa-solid fa-plus"></i> Cuộc trò chuyện mới
+    </button>
+    <div class="sidebar-label">Lĩnh vực & Tài liệu</div>
+    <div id="topicList">
+      <div class="history-item" onclick="sendQuick('tìm đồ án tốt nghiệp')"><i class="fa-solid fa-graduation-cap"></i>Đồ
+        án tốt nghiệp</div>
+      <div class="history-item" onclick="sendQuick('tìm bài báo khoa học')"><i class="fa-solid fa-microscope"></i>Nghiên
+        cứu khoa học</div>
+      <div class="history-item" onclick="sendQuick('tìm tài liệu công nghệ thông tin')"><i
+          class="fa-solid fa-laptop-code"></i>Công nghệ thông tin</div>
+      <div class="history-item" onclick="sendQuick('tìm tài liệu kỹ thuật cơ khí')"><i class="fa-solid fa-gears"></i>Kỹ
+        thuật Cơ khí</div>
+      <div class="history-item" onclick="sendQuick('tìm tài liệu kinh tế quản lý')"><i
+          class="fa-solid fa-chart-line"></i>Kinh tế - Quản lý</div>
+      <div class="history-item" onclick="sendQuick('tìm sách ngoại ngữ')"><i class="fa-solid fa-language"></i>Ngoại ngữ
+      </div>
+    </div>
+
+    <div class="sidebar-label" style="margin-top: 24px;">Lịch sử trò chuyện</div>
+    <div id="historyList">
+      <div class="history-item" style="opacity:0.5; cursor:default;"><i class="fa-solid fa-clock"></i>Chưa có lịch sử
+      </div>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="info-badge">
+        <strong> Sourse data</strong>
+        <p>DSpace 7.4 <br>dlib.hust.edu.vn</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="header">
+      <div class="header-title">
+        <h1>Trợ Lý Tìm Kiếm Tài Liệu</h1>
+        <p>Dữ liệu thời gian thực từ thư viện số</p>
+      </div>
+      <div class="status">
+        <div class="dot"></div>Đang hoạt động
+      </div>
+    </div>
+
+    <div class="messages" id="chatbox"></div>
+
+    <div class="chips" id="chips">
+      <div class="chip" onclick="sendQuick('hướng dẫn mượn sách')">📖 Hướng dẫn mượn sách</div>
+      <div class="chip" onclick="sendQuick('giờ mở cửa')">🕐 Giờ mở cửa</div>
+      <div class="chip" onclick="sendQuick('địa chỉ thư viện')">📍 Địa chỉ</div>
+      <div class="chip" onclick="sendQuick('tìm sách kỹ năng mềm')">🌱 Kỹ năng mềm</div>
+      <div class="chip" onclick="sendQuick('gợi ý tài liệu tham khảo')">✨ Gợi ý tài liệu</div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-wrap">
+        <input type="text" id="userInput" placeholder="Nhập câu hỏi hoặc từ khóa tài liệu..."
+          onkeydown="if(event.key==='Enter')sendMessage()">
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = "https://progress-unpledged-password.ngrok-free.dev";
+    let SESSION = localStorage.getItem("chat_session");
+    if (!SESSION) {
+      SESSION = "user_" + Math.random().toString(36).slice(2, 9);
+      localStorage.setItem("chat_session", SESSION);
+    }
+
+    let isTyping = false;
+
+    window.onload = async () => {
+      await loadHistory();
+    };
+
+    async function loadHistory() {
+      try {
+        const res = await fetch(`${API}/history/${SESSION}`);
+        if (res.ok) {
+          const history = await res.json();
+          if (history && history.length > 0) {
+            // Ẩn chips nếu đã có lịch sử
+            document.getElementById("chips").style.display = "none";
+
+            let userQueries = [];
+
+            history.forEach(msg => {
+              if (msg.role === "user") {
+                addUserMsg(msg.content, false);
+                if (!userQueries.includes(msg.content)) {
+                  userQueries.push(msg.content);
+                }
+              } else {
+                if (msg.type === "books" || msg.type === "suggest_books") {
+                  addBotWithCards(msg.content, msg.books || [], false);
+                } else {
+                  addBotMsg(msg.content, false);
+                }
+              }
+            });
+            scroll();
+
+            updateSidebarHistory(userQueries);
+            return;
+          }
+        }
+      } catch (e) {
+        console.error("Lỗi tải lịch sử:", e);
+      }
+
+      // Mặc định nếu không có lịch sử
+      addBotMsg("👋 Xin chào! Tôi là **SmartLib AI** – trợ lý thư viện thông minh.\n\nBạn có thể:\n• 🔍 Tìm tài liệu: *\"tìm sách về machine learning\"*\n• 💡 Gợi ý sách: *\"gợi ý sách hay cho tôi\"*\n• ❓ Hỏi thông tin: *\"giờ mở cửa\"*, *\"địa chỉ thư viện\"*");
+    }
+
+    function updateSidebarHistory(queries) {
+      const list = document.getElementById("historyList");
+      // Lấy 5 câu hỏi gần nhất
+      const recent = queries.reverse().slice(0, 5);
+      if (recent.length > 0) {
+        list.innerHTML = "";
+        recent.forEach(q => {
+          const shortQ = q.length > 25 ? q.substring(0, 25) + '...' : q;
+          // Thoát chuỗi an toàn
+          const safeQ = q.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+          list.innerHTML += `<div class="history-item" onclick="sendQuick('${safeQ}')"><i class="fa-solid fa-clock-rotate-left"></i>${escHtml(shortQ)}</div>`;
+        });
+      }
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const text = input.value.trim();
+      if (!text || isTyping) return;
+      input.value = "";
+      document.getElementById("chips").style.display = "none";
+      addUserMsg(text);
+      showTyping();
+
+      try {
+        const res = await fetch(`${API}/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text, session_id: SESSION })
+        });
+
+        if (!res.ok) throw new Error("Server lỗi " + res.status);
+        const data = await res.json();
+        removeTyping();
+
+        if (data.type === "books" || data.type === "suggest_books") {
+          addBotWithCards(data.text, data.books);
+        } else {
+          addBotMsg(data.text);
+        }
+
+        // Tải lại lịch sử sidebar ngầm để cập nhật câu hỏi mới nhất
+        fetch(`${API}/history/${SESSION}`).then(r => r.json()).then(h => {
+          let qs = [];
+          h.forEach(m => { if (m.role === 'user' && !qs.includes(m.content)) qs.push(m.content); });
+          updateSidebarHistory(qs);
+        });
+
+      } catch (e) {
+        removeTyping();
+        addBotMsg("⚠️ Không thể kết nối server. Hãy đảm bảo backend đang chạy tại **localhost:8001**.\n\n`python main.py` trong thư mục `backend`.");
+      }
+    }
+
+    function sendQuick(text) {
+      document.getElementById("userInput").value = text;
+      sendMessage();
+    }
+
+    function addUserMsg(text, doScroll = true) {
+      const box = document.getElementById("chatbox");
+      box.innerHTML += `<div class="msg user">
+    <div class="avatar"><i class="fa-solid fa-user"></i></div>
+    <div class="bubble">${escHtml(text)}</div>
+  </div>`;
+      if (doScroll) scroll();
+    }
+
+    function addBotMsg(text, doScroll = true) {
+      const box = document.getElementById("chatbox");
+      box.innerHTML += `<div class="msg bot">
+    <div class="avatar"><i class="fa-solid fa-robot"></i></div>
+    <div class="bubble">${renderMd(text)}</div>
+  </div>`;
+      if (doScroll) scroll();
+    }
+
+    function addBotWithCards(text, books, doScroll = true) {
+      const box = document.getElementById("chatbox");
+      const cards = books.map(b => `
+    <a class="card" href="${b.url}" target="_blank">
+      <div class="card-type">${escHtml(b.type || 'Tài liệu')}</div>
+      <div class="card-title">${escHtml(b.title)}</div>
+      <div class="card-author"><i class="fa-solid fa-user-pen" style="margin-right:5px;opacity:.6"></i>${escHtml((b.authors || []).join(', ') || 'Không rõ tác giả')}</div>
+      ${b.abstract ? `<div class="card-abstract">${escHtml(b.abstract)}</div>` : ''}
+      <div class="card-btn"><i class="fa-solid fa-arrow-up-right-from-square" style="margin-right:5px"></i>Xem chi tiết</div>
+    </a>`).join('');
+
+      box.innerHTML += `<div class="msg bot">
+    <div class="avatar"><i class="fa-solid fa-robot"></i></div>
+    <div style="flex:1;min-width:0">
+      <div class="bubble" style="display:inline-block;margin-bottom:0">${renderMd(text)}</div>
+      <div class="cards">${cards}</div>
+    </div>
+  </div>`;
+      if (doScroll) scroll();
+    }
+
+    function showTyping() {
+      isTyping = true;
+      document.getElementById("sendBtn").disabled = true;
+      const box = document.getElementById("chatbox");
+      box.innerHTML += `<div class="msg bot" id="typing-indicator">
+    <div class="avatar"><i class="fa-solid fa-robot"></i></div>
+    <div class="bubble" style="padding:0"><div class="typing"><span></span><span></span><span></span></div></div>
+  </div>`;
+      scroll();
+    }
+
+    function removeTyping() {
+      isTyping = false;
+      document.getElementById("sendBtn").disabled = false;
+      const el = document.getElementById("typing-indicator");
+      if (el) el.remove();
+    }
+
+    function scroll() {
+      const c = document.getElementById("chatbox");
+      c.scrollTop = c.scrollHeight;
+      setTimeout(() => { c.scrollTop = c.scrollHeight; }, 150);
+    }
+
+    function escHtml(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+    function renderMd(t) {
+      return escHtml(t)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/`(.+?)`/g, '<code style="background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-size:13px">$1</code>')
+        .replace(/\n/g, '<br>');
+    }
+
+    function createNewChat() {
+      if (confirm("Bạn có muốn xóa cuộc trò chuyện hiện tại và bắt đầu mới?")) {
+        SESSION = "user_" + Math.random().toString(36).slice(2, 9);
+        localStorage.setItem("chat_session", SESSION);
+        document.getElementById("chatbox").innerHTML = "";
+        document.getElementById("chips").style.display = "flex";
+        addBotMsg("👋 Đã bắt đầu cuộc trò chuyện mới! Tôi có thể giúp gì cho bạn?");
+        // Reset sidebar history nếu cần (hoặc giữ lại để xem cũ)
+        // loadHistory(); // Để load lại list từ server
+      }
+    }
+  </script>
+</body>
+
+</html>
