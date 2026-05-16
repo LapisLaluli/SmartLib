@@ -1,0 +1,8 @@
+.git
+.vscode
+backend/.env
+backend/__pycache__
+backend/services/__pycache__
+backend/history.json
+__pycache__
+*.pyc
