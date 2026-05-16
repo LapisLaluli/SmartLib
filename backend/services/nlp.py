@@ -62,6 +62,13 @@ FAQ_CONTEXT = """
 8. Quá hạn trả sách bị phạt bao nhiêu tiền? -> Mức phạt là 2.000 VNĐ cho mỗi cuốn sách bị quá hạn 1 ngày.
 9. Thư viện có sách ngoại văn không? -> Có, sách ngoại văn và tạp chí quốc tế chủ yếu tập trung ở kho Tầng 4 và Tầng 5.
 10. Làm sao để tải tài liệu điện tử (PDF)? -> Truy cập trang dlib.hust.edu.vn, đăng nhập bằng tài khoản email sinh viên HUST (@hust.edu.vn) để đọc và tải tài liệu số.
+
+# 4. KÊNH THÔNG TIN CHÍNH THỨC (LIÊN HỆ)
+- Website Đại học Bách khoa Hà Nội: https://hust.edu.vn
+- Facebook Đại học Bách khoa Hà Nội: https://www.facebook.com/dhbkhanoi
+- Website Thư viện Tạ Quang Bửu: https://library.hust.edu.vn
+- Facebook Thư viện Tạ Quang Bửu: https://www.facebook.com/libraryhust
+- Cổng tài liệu số: https://dlib.hust.edu.vn
 """
 
 # Instruction hệ thống thay vì prompt cộng gộp
@@ -119,11 +126,12 @@ def fallback_intent(text: str) -> dict:
     
     FAQ_MAP = {
         ("giờ", "m mở cửa", "đóng cửa", "mấy giờ", "hoạt động"): "🕐 Thư viện mở cửa:\n• Thứ 2 – Thứ 6: 8:00 – 21:00\n• Thứ 7: 8:00 – 17:00\n• Chủ nhật: Nghỉ",
-        ("địa chỉ", "ở đâu", "chỗ nào", "vị trí"): "📍 Địa chỉ: Số 1 Đại Cồ Việt, phường Bạch Mai, Hà Nội\n🌐 Website: library.hust.edu.vn",
+        ("địa chỉ", "ở đâu", "chỗ nào", "vị trí"): "📍 Địa chỉ: Tòa nhà Tạ Quang Bửu, Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội.\n🌐 Website: https://library.hust.edu.vn\n📱 Fanpage: https://www.facebook.com/libraryhust",
         ("thẻ thư viện", "làm thẻ", "đăng ký"): "📋 Làm thẻ thư viện (Miễn phí):\n1. Mang Thẻ SV/CCCD và ảnh 3x4\n2. Đến quầy dịch vụ tầng 1\n3. Lấy thẻ trong ngày",
         ("mượn sách", "trả sách", "quá hạn"): "📚 Mượn tối đa 5 cuốn/lần, thời hạn 14 ngày. Quá hạn phạt 2.000 VNĐ/cuốn/ngày.",
         ("wifi", "mạng", "internet"): "📶 Wifi thư viện:\n• Tên: HUST_Library\n• Pass: thuviendhbk",
-        ("phòng tự học", "phòng học", "học nhóm"): "🏢 Phòng tự học ở tầng 3, 4, 5. Tầng 4 có phòng học nhóm (đăng ký qua web)."
+        ("phòng tự học", "phòng học", "học nhóm"): "🏢 Phòng tự học ở tầng 3, 4, 5. Tầng 4 có phòng học nhóm (đăng ký qua web).",
+        ("website", "facebook", "fanpage", "liên hệ", "kết nối"): "🔗 Các kênh thông tin chính thức:\n• Website HUST: https://hust.edu.vn\n• Facebook HUST: https://www.facebook.com/dhbkhanoi\n• Website Thư viện: https://library.hust.edu.vn\n• Facebook Thư viện: https://www.facebook.com/libraryhust"
     }
 
     if any(w in text_lower for w in ("hi", "hello", "xin chào", "chào")):
