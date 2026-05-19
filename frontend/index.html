@@ -18,42 +18,40 @@
     :root {
       --primary: #06b6d4;
       --primary-dark: #0891b2;
-      --bg1: #030712;
-      --bg2: #0b0f19;
-      --bg-gradient: radial-gradient(circle at 50% 0%, #032d42, #030712 85%);
-      --glass: rgba(255, 255, 255, 0.02);
-      --glass-b: rgba(255, 255, 255, 0.05);
-      --text: #f3f4f6;
-      --muted: #6b7280;
-      --success: #10b981
+      --bg1: #020617;
+      --bg2: #0f172a;
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-b: rgba(255, 255, 255, 0.07);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --success: #22c55e
     }
 
     [data-theme="green"] {
       --primary: #10b981;
       --primary-dark: #059669;
-      --bg-gradient: radial-gradient(circle at 50% 0%, #022c22, #030712 85%);
+      --bg1: #022c22;
     }
 
     [data-theme="purple"] {
-      --primary: #a855f7;
-      --primary-dark: #9333ea;
-      --bg-gradient: radial-gradient(circle at 50% 0%, #2e1065, #030712 85%);
+      --primary: #8b5cf6;
+      --primary-dark: #7c3aed;
+      --bg1: #2e1065;
     }
 
     [data-theme="rose"] {
       --primary: #f43f5e;
       --primary-dark: #e11d48;
-      --bg-gradient: radial-gradient(circle at 50% 0%, #4c0519, #030712 85%);
+      --bg1: #4c0519;
     }
 
     body {
-      background: var(--bg-gradient);
+      background: radial-gradient(circle at top right, #1e293b, var(--bg1) 70%);
       height: 100vh;
       margin: 0;
       display: flex;
       color: var(--text);
-      overflow: hidden;
-      transition: background 0.3s ease;
+      overflow: hidden
     }
 
     /* ===== SIDEBAR ===== */
@@ -80,24 +78,22 @@
     .logo-icon {
       width: 38px;
       height: 38px;
+      background: linear-gradient(135deg, var(--primary), #3b82f6);
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
       overflow: hidden;
-      border: 1.5px solid var(--primary);
-      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.15);
-      transition: border-color 0.3s ease;
     }
 
     .logo-text {
       font-size: 18px;
       font-weight: 700;
-      color: #ffffff;
-      background: linear-gradient(to right, #ffffff, var(--primary));
+      background: linear-gradient(to right, #22d3ee, #60a5fa);
       -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      transition: background 0.3s ease;
+      -webkit-text-fill-color: transparent
     }
 
     .sidebar-label {
@@ -156,8 +152,8 @@
     .new-chat-btn {
       width: 100%;
       padding: 12px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--glass-b);
+      background: linear-gradient(135deg, var(--primary), #3b82f6);
+      border: none;
       border-radius: 10px;
       color: #fff;
       font-weight: 600;
@@ -168,14 +164,14 @@
       gap: 10px;
       cursor: pointer;
       margin-bottom: 24px;
-      transition: all 0.25s;
+      transition: .25s;
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2)
     }
 
     .new-chat-btn:hover {
-      transform: translateY(-1px);
-      background: rgba(255, 255, 255, 0.06);
-      border-color: var(--primary);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
+      filter: brightness(1.1)
     }
 
     .new-chat-btn i {
@@ -299,24 +295,27 @@
       align-items: center;
       justify-content: center;
       font-size: 14px;
-      flex-shrink: 0
+      flex-shrink: 0;
+      overflow: hidden;
+      -webkit-mask-image: -webkit-radial-gradient(white, black);
     }
 
     .msg.bot .avatar {
-      background: var(--glass-b);
-      border: 1px solid var(--primary);
+      background: linear-gradient(135deg, var(--primary), #3b82f6);
       overflow: hidden;
-      transition: border-color 0.3s ease;
     }
 
     .msg.user .avatar {
-      background: #374151
+      background: #475569
     }
 
-    .avatar img {
+    .avatar img, .logo-icon img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      display: block;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
     }
 
     .bubble {
