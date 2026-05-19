@@ -24,34 +24,43 @@
       --glass-b: rgba(255, 255, 255, 0.07);
       --text: #f8fafc;
       --muted: #94a3b8;
-      --success: #22c55e
+      --success: #22c55e;
+      --bg-image: url('bg.png');
     }
 
     [data-theme="green"] {
       --primary: #10b981;
       --primary-dark: #059669;
       --bg1: #022c22;
+      --bg-image: url('backgroup.jpg');
     }
 
     [data-theme="purple"] {
       --primary: #8b5cf6;
       --primary-dark: #7c3aed;
       --bg1: #2e1065;
+      --bg-image: url('bg2.jpg');
     }
 
     [data-theme="rose"] {
       --primary: #f43f5e;
       --primary-dark: #e11d48;
       --bg1: #4c0519;
+      --bg-image: url('bg3.jpg');
     }
 
     body {
-      background: radial-gradient(circle at top right, #1e293b, var(--bg1) 70%);
+      background-color: var(--bg1);
+      background-image: var(--bg-image);
+      background-size: cover;
+      background-position: center;
+      background-blend-mode: soft-light;
       height: 100vh;
       margin: 0;
       display: flex;
       color: var(--text);
-      overflow: hidden
+      overflow: hidden;
+      transition: background-color 0.3s ease, background-image 0.3s ease;
     }
 
     /* ===== SIDEBAR ===== */
@@ -328,8 +337,9 @@
 
     .msg.bot .bubble {
       background: var(--glass);
+      backdrop-filter: blur(10px);
       border: 1px solid var(--glass-b);
-      border-bottom-left-radius: 4px
+      border-bottom-left-radius: 4px;
     }
 
     .msg.user .bubble {
@@ -352,6 +362,7 @@
 
     .card {
       background: rgba(255, 255, 255, .03);
+      backdrop-filter: blur(10px);
       border: 1px solid var(--glass-b);
       border-radius: 12px;
       padding: 14px;
@@ -361,7 +372,7 @@
       transition: .25s;
       cursor: pointer;
       text-decoration: none;
-      color: inherit
+      color: inherit;
     }
 
     .card:hover {
