@@ -4,11 +4,40 @@ import random
 DSPACE_BASE = "https://dlib.hust.edu.vn/server/api"
 
 
-def search_documents(keyword: str, size: int = 5) -> list[dict]:
-    """Tìm kiếm tài liệu trên DSpace 7.4 HUST theo từ khóa."""
+def search_documents(keyword: str, author: str = "", publisher: str = "", subject: str = "", collection: str = "", year: str = "", size: int = 5) -> list[dict]:
+    """Tìm kiếm tài liệu trên DSpace 7.4 HUST theo từ khóa và các bộ lọc chính xác."""
     try:
         url = f"{DSPACE_BASE}/discover/search/objects"
-        params = {"query": keyword, "dsoType": "item", "size": size}
+
+        # Khởi tạo các tham số cơ bản
+        params = {
+            "dsoType": "item",
+            "size": size
+        }
+
+        # Xử lý phần query chung (từ khóa hoặc nhà xuất bản nếu có)
+        query_parts = []
+        if keyword:
+            query_parts.append(keyword)
+        if publisher:
+            query_parts.append(f"dc.publisher:({publisher})")
+
+        if query_parts:
+            params["query"] = " AND ".join(query_parts)
+        else:
+            params["query"] = "*" # Mặc định lấy tất cả để áp bộ lọc
+
+        # Áp dụng bộ lọc chính xác (DSpace Discovery Filters)
+        if author:
+            params["f.author"] = f"{author},contains"
+        if subject:
+            params["f.subject"] = f"{subject},contains"
+        if collection:
+            # Lọc theo loại tài liệu (Khóa luận, Luận văn, Đồ án, Giáo trình...)
+            params["f.itemtype"] = f"{collection},contains"
+        if year:
+            params["f.dateIssued"] = f"{year},contains"
+
         resp = requests.get(url, params=params, timeout=10)
         resp.raise_for_status()
 

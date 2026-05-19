@@ -31,7 +31,12 @@ def switch_key():
 # Schema định dạng đầu ra của AI
 class IntentResponse(BaseModel):
     intent: str = Field(description="Phân loại ý định: 'search' (tìm sách), 'suggest' (gợi ý sách), 'faq' (thông tin thư viện), 'chat' (hỏi đáp/kiến thức chung), 'greeting' (chào hỏi)")
-    keyword: str = Field(description="Từ khóa để tìm kiếm sách (tên sách, tác giả, chủ đề...). Chỉ có giá trị khi intent là 'search'. Các trường hợp khác để trống.", default="")
+    keyword: str = Field(description="Từ khóa để tìm kiếm sách chung chung (tên sách...). Để trống nếu không có.", default="")
+    author: str = Field(description="Tên tác giả nếu người dùng có nhắc đến (ví dụ: viết bởi Nguyễn Văn A -> Nguyễn Văn A).", default="")
+    publisher: str = Field(description="Nhà xuất bản (ví dụ: NXB Trẻ, NXB Bách khoa).", default="")
+    subject: str = Field(description="Chủ đề/Thể loại tài liệu (ví dụ: Trí tuệ nhân tạo, Toán cao cấp).", default="")
+    collection: str = Field(description="Bộ sưu tập/Loại tài liệu (ví dụ: Luận văn, Đồ án tốt nghiệp, Giáo trình).", default="")
+    year: str = Field(description="Năm xuất bản nếu có nhắc đến (ví dụ: 2023, 2024).", default="")
     reply: str = Field(description="Câu trả lời của AI dành cho người dùng. Dùng ngôn ngữ tự nhiên, thân thiện và chi tiết. Hướng dẫn từng bước nếu là 'faq'.")
 
 # --- Thêm thông tin nội bộ (Context) cho Thư viện ---
@@ -143,11 +148,16 @@ def fallback_intent(text: str) -> dict:
 
     if any(trigger in text_lower for trigger in ["tìm", "sách về", "tài liệu"]):
         keyword = re.sub(r"^(tìm|sách về|tài liệu về)\s+", "", text_lower)
-        return {"intent": "search", "keyword": keyword or text, "answer": f"Đang tìm kiếm tài liệu về '{keyword or text}'..."}
+        return {"intent": "search", "keyword": keyword or text, "author": "", "publisher": "", "subject": "", "collection": "", "year": "", "answer": f"Đang tìm kiếm tài liệu về '{keyword or text}'..."}
 
     return {
         "intent": "chat", 
         "keyword": "",
+        "author": "",
+        "publisher": "",
+        "subject": "",
+        "collection": "",
+        "year": "",
         "answer": "⚠️ Xin lỗi, hệ thống AI đang bảo trì. Tuy nhiên, bạn vẫn có thể dùng các lệnh như:\n• *tìm sách [tên sách]*\n• *giờ mở cửa*\n• *làm thẻ thư viện*"
     }
 
@@ -180,6 +190,11 @@ def detect_intent(text: str, chat_history: list = None) -> dict:
                 result = json.loads(raw_text)
                 intent = result.get("intent", "chat")
                 keyword = result.get("keyword", "")
+                author = result.get("author", "")
+                publisher = result.get("publisher", "")
+                subject = result.get("subject", "")
+                collection = result.get("collection", "")
+                year = result.get("year", "")
                 answer = result.get("reply", "Tôi có thể giúp gì cho bạn?")
                 
                 # Bước 2: Nếu cần trả lời thông tin (faq/chat), kích hoạt Google Search Grounding riêng biệt
@@ -201,6 +216,11 @@ def detect_intent(text: str, chat_history: list = None) -> dict:
                 return {
                     "intent": intent,
                     "keyword": keyword,
+                    "author": author,
+                    "publisher": publisher,
+                    "subject": subject,
+                    "collection": collection,
+                    "year": year,
                     "answer": answer
                 }
             

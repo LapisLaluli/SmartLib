@@ -60,10 +60,25 @@ async def chat(req: ChatRequest):
 
         # --- Intent: Tìm tài liệu ---
         elif intent == "search":
-            keyword = result.get("keyword")
-            if not keyword:
+            keyword = result.get("keyword", "")
+            author = result.get("author", "")
+            publisher = result.get("publisher", "")
+            subject = result.get("subject", "")
+            collection = result.get("collection", "")
+            year = result.get("year", "")
+
+            if not any([keyword, author, publisher, subject, collection, year]):
                 keyword = req.message
-            books = search_documents(keyword, size=6)
+
+            books = search_documents(
+                keyword=keyword,
+                author=author,
+                publisher=publisher,
+                subject=subject,
+                collection=collection,
+                year=year,
+                size=6
+            )
 
             if not books:
                 response_data = ChatResponse(
@@ -145,8 +160,25 @@ async def botstar_search(req: BotStarRequest):
     intent = result.get("intent")
     
     if intent == "search":
-        keyword = result.get("keyword") or req.query
-        books = search_documents(keyword, size=3) # Lấy top 3 cuốn chất lượng
+        keyword = result.get("keyword", "")
+        author = result.get("author", "")
+        publisher = result.get("publisher", "")
+        subject = result.get("subject", "")
+        collection = result.get("collection", "")
+        year = result.get("year", "")
+
+        if not any([keyword, author, publisher, subject, collection, year]):
+            keyword = req.query
+
+        books = search_documents(
+            keyword=keyword,
+            author=author,
+            publisher=publisher,
+            subject=subject,
+            collection=collection,
+            year=year,
+            size=3
+        ) # Lấy top 3 cuốn chất lượng
         
         if not books:
             return {
