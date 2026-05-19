@@ -4,7 +4,7 @@ import random
 DSPACE_BASE = "https://dlib.hust.edu.vn/server/api"
 
 
-def search_documents(keyword: str, author: str = "", publisher: str = "", subject: str = "", collection: str = "", year: str = "", size: int = 5) -> list[dict]:
+def search_documents(keyword: str, author: str = "", publisher: str = "", subject: str = "", collection: str = "", year: str = "", language: str = "", size: int = 5) -> list[dict]:
     """Tìm kiếm tài liệu trên DSpace 7.4 HUST theo từ khóa và các bộ lọc chính xác."""
     try:
         url = f"{DSPACE_BASE}/discover/search/objects"
@@ -21,6 +21,11 @@ def search_documents(keyword: str, author: str = "", publisher: str = "", subjec
             query_parts.append(keyword)
         if publisher:
             query_parts.append(f"dc.publisher:({publisher})")
+        if language:
+            # Map ngôn ngữ sang mã ISO
+            lang_code = "en" if any(w in language.lower() for w in ["anh", "english"]) else "vi" if any(w in language.lower() for w in ["việt", "vietnamese"]) else ""
+            if lang_code:
+                query_parts.append(f"dc.language.iso:({lang_code})")
 
         if query_parts:
             params["query"] = " AND ".join(query_parts)

@@ -27,6 +27,24 @@
       --success: #22c55e
     }
 
+    [data-theme="green"] {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --bg1: #022c22;
+    }
+
+    [data-theme="purple"] {
+      --primary: #8b5cf6;
+      --primary-dark: #7c3aed;
+      --bg1: #2e1065;
+    }
+
+    [data-theme="rose"] {
+      --primary: #f43f5e;
+      --primary-dark: #e11d48;
+      --bg1: #4c0519;
+    }
+
     body {
       background: radial-gradient(circle at top right, #1e293b, var(--bg1) 70%);
       height: 100vh;
@@ -645,8 +663,17 @@
           <p>Dữ liệu thời gian thực từ thư viện số</p>
         </div>
       </div>
-      <div class="status">
-        <div class="dot"></div>Đang hoạt động
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <!-- Theme Switcher -->
+        <div class="theme-switcher" style="display: flex; gap: 8px;">
+          <div style="width: 14px; height: 14px; background: #06b6d4; border-radius: 50%; cursor: pointer;" onclick="setTheme('default')" title="Cyan"></div>
+          <div style="width: 14px; height: 14px; background: #10b981; border-radius: 50%; cursor: pointer;" onclick="setTheme('green')" title="Green"></div>
+          <div style="width: 14px; height: 14px; background: #8b5cf6; border-radius: 50%; cursor: pointer;" onclick="setTheme('purple')" title="Purple"></div>
+          <div style="width: 14px; height: 14px; background: #f43f5e; border-radius: 50%; cursor: pointer;" onclick="setTheme('rose')" title="Rose"></div>
+        </div>
+        <div class="status">
+          <div class="dot"></div>Đang hoạt động
+        </div>
       </div>
     </div>
 
@@ -882,6 +909,15 @@
       if(sidebar) sidebar.classList.toggle("open");
       if(overlay) overlay.classList.toggle("active");
     }
+
+    function setTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem("app_theme", theme);
+    }
+    
+    // Load theme on startup
+    const savedTheme = localStorage.getItem("app_theme");
+    if (savedTheme) setTheme(savedTheme);
   </script>
 </body>
 

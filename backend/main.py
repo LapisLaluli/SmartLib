@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from services.nlp import detect_intent
+from services.nlp import detect_intent, summarize_books
 from services.dspace_client import search_documents, get_books_by_subject
 from services.history_client import save_search, get_favorite_subject, save_chat_message, get_chat_history
 import uvicorn
@@ -66,8 +66,9 @@ async def chat(req: ChatRequest):
             subject = result.get("subject", "")
             collection = result.get("collection", "")
             year = result.get("year", "")
+            language = result.get("language", "")
 
-            if not any([keyword, author, publisher, subject, collection, year]):
+            if not any([keyword, author, publisher, subject, collection, year, language]):
                 keyword = req.message
 
             books = search_documents(
@@ -77,6 +78,7 @@ async def chat(req: ChatRequest):
                 subject=subject,
                 collection=collection,
                 year=year,
+                language=language,
                 size=6
             )
 
@@ -91,9 +93,12 @@ async def chat(req: ChatRequest):
                 if all_subjects:
                     save_search(req.session_id, all_subjects)
 
-                # Sử dụng câu trả lời giải thích từ AI nếu có
+                # Sử dụng câu trả lời giải thích từ AI nếu có hoặc tóm tắt AI
                 ai_text = result.get("answer")
-                display_text = ai_text if ai_text else f"📚 Tìm thấy tài liệu về **\"{keyword}\"**:"
+                if not ai_text or ai_text.startswith("Đang tìm kiếm") or ai_text == "Tôi có thể giúp gì cho bạn?":
+                    display_text = summarize_books(keyword or req.message, books)
+                else:
+                    display_text = ai_text
 
                 response_data = ChatResponse(
                     type="books",
@@ -166,8 +171,9 @@ async def botstar_search(req: BotStarRequest):
         subject = result.get("subject", "")
         collection = result.get("collection", "")
         year = result.get("year", "")
+        language = result.get("language", "")
 
-        if not any([keyword, author, publisher, subject, collection, year]):
+        if not any([keyword, author, publisher, subject, collection, year, language]):
             keyword = req.query
 
         books = search_documents(
@@ -177,6 +183,7 @@ async def botstar_search(req: BotStarRequest):
             subject=subject,
             collection=collection,
             year=year,
+            language=language,
             size=3
         ) # Lấy top 3 cuốn chất lượng
         

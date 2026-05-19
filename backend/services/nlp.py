@@ -37,6 +37,7 @@ class IntentResponse(BaseModel):
     subject: str = Field(description="Chủ đề/Thể loại tài liệu (ví dụ: Trí tuệ nhân tạo, Toán cao cấp).", default="")
     collection: str = Field(description="Bộ sưu tập/Loại tài liệu (ví dụ: Luận văn, Đồ án tốt nghiệp, Giáo trình).", default="")
     year: str = Field(description="Năm xuất bản nếu có nhắc đến (ví dụ: 2023, 2024).", default="")
+    language: str = Field(description="Ngôn ngữ tài liệu nếu có nhắc đến (ví dụ: tiếng anh, tiếng việt, english).", default="")
     reply: str = Field(description="Câu trả lời của AI dành cho người dùng. Dùng ngôn ngữ tự nhiên, thân thiện và chi tiết. Hướng dẫn từng bước nếu là 'faq'.")
 
 # --- Thêm thông tin nội bộ (Context) cho Thư viện ---
@@ -148,7 +149,7 @@ def fallback_intent(text: str) -> dict:
 
     if any(trigger in text_lower for trigger in ["tìm", "sách về", "tài liệu"]):
         keyword = re.sub(r"^(tìm|sách về|tài liệu về)\s+", "", text_lower)
-        return {"intent": "search", "keyword": keyword or text, "author": "", "publisher": "", "subject": "", "collection": "", "year": "", "answer": f"Đang tìm kiếm tài liệu về '{keyword or text}'..."}
+        return {"intent": "search", "keyword": keyword or text, "author": "", "publisher": "", "subject": "", "collection": "", "year": "", "language": "", "answer": f"Đang tìm kiếm tài liệu về '{keyword or text}'..."}
 
     return {
         "intent": "chat", 
@@ -158,6 +159,7 @@ def fallback_intent(text: str) -> dict:
         "subject": "",
         "collection": "",
         "year": "",
+        "language": "",
         "answer": "⚠️ Xin lỗi, hệ thống AI đang bảo trì. Tuy nhiên, bạn vẫn có thể dùng các lệnh như:\n• *tìm sách [tên sách]*\n• *giờ mở cửa*\n• *làm thẻ thư viện*"
     }
 
@@ -195,6 +197,7 @@ def detect_intent(text: str, chat_history: list = None) -> dict:
                 subject = result.get("subject", "")
                 collection = result.get("collection", "")
                 year = result.get("year", "")
+                language = result.get("language", "")
                 answer = result.get("reply", "Tôi có thể giúp gì cho bạn?")
                 
                 # Bước 2: Nếu cần trả lời thông tin (faq/chat), kích hoạt Google Search Grounding riêng biệt
@@ -221,6 +224,7 @@ def detect_intent(text: str, chat_history: list = None) -> dict:
                     "subject": subject,
                     "collection": collection,
                     "year": year,
+                    "language": language,
                     "answer": answer
                 }
             
@@ -238,3 +242,32 @@ def detect_intent(text: str, chat_history: list = None) -> dict:
 
     # Nếu tất cả các keys đều lỗi hoặc AI lỗi chung
     return fallback_intent(text)
+
+def summarize_books(keyword: str, books: list) -> str:
+    """Sử dụng AI để tóm tắt 2-3 tài liệu đầu tiên tìm được."""
+    if not books:
+        return f"Rất tiếc, tôi không tìm thấy tài liệu nào về '{keyword}'."
+        
+    client = get_client()
+    if not client:
+        return f"📚 Tôi đã tìm thấy một số tài liệu về **\"{keyword}\"**. Bạn có thể xem danh sách bên dưới:"
+        
+    # Chuẩn bị context tóm tắt
+    context = ""
+    for idx, b in enumerate(books[:3]):
+        context += f"{idx+1}. Tiêu đề: {b.get('title')}. Tác giả: {', '.join(b.get('authors', []))}. Tóm tắt: {b.get('abstract', 'Không có')}\n"
+        
+    prompt = f"Bạn là một thủ thư thư viện thông minh. Người dùng vừa tìm kiếm từ khóa '{keyword}'. Dưới đây là top {len(books[:3])} tài liệu hàng đầu:\n{context}\nViết 1 đoạn văn ngắn gọn (tối đa 3 dòng) bằng tiếng Việt để giới thiệu khái quát nội dung nổi bật của các cuốn sách này thật hấp dẫn. KHÔNG LIỆT KÊ LẠI TIÊU ĐỀ SÁCH VÀ TÁC GIẢ vì chúng tôi đã hiển thị trên giao diện rồi."
+    
+    try:
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(temperature=0.5)
+        )
+        if response.text:
+            return response.text.strip()
+    except Exception as e:
+        print(f"⚠️ Lỗi summarize_books: {e}")
+        
+    return f"📚 Dưới đây là các tài liệu nổi bật nhất về **\"{keyword}\"** mà tôi tìm thấy:"
