@@ -712,9 +712,9 @@
 
     <div class="input-area">
       <div class="input-wrap">
-        <input type="text" id="userInput" placeholder="Nhập câu hỏi hoặc từ khóa tài liệu..."
-          onkeydown="if(event.key==='Enter')sendMessage()">
-        <button class="send-btn" id="sendBtn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+        <input type="text" id="userInput" placeholder="Hệ thống đang khởi động..."
+          onkeydown="if(event.key==='Enter')sendMessage()" disabled>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled><i class="fa-solid fa-paper-plane"></i></button>
       </div>
     </div>
   </div>
@@ -729,9 +729,40 @@
 
     let isTyping = false;
 
+    let wakeupTimer;
+
     window.onload = async () => {
+      wakeupTimer = setTimeout(() => {
+        showWakeUpMessage();
+      }, 500);
+
       await loadHistory();
+      
+      clearTimeout(wakeupTimer);
+      hideWakeUpMessage();
     };
+
+    function showWakeUpMessage() {
+      const box = document.getElementById("chatbox");
+      if(document.getElementById("wakeup-msg")) return;
+      box.innerHTML += `<div class="msg bot" id="wakeup-msg">
+    <div class="avatar"><img src="doro.jpg" alt="Bot"></div>
+    <div class="bubble" style="background: rgba(234, 179, 8, 0.1); color: #eab308; border-color: rgba(234, 179, 8, 0.3);">
+      <i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i>Hệ thống đang được đánh thức (có thể mất khoảng 30s-50s). Vui lòng đợi trong giây lát...
+    </div>
+  </div>`;
+      scroll();
+    }
+
+    function hideWakeUpMessage() {
+      const el = document.getElementById("wakeup-msg");
+      if (el) el.remove();
+      
+      const inp = document.getElementById("userInput");
+      const btn = document.getElementById("sendBtn");
+      if(inp) { inp.disabled = false; inp.placeholder = "Nhập câu hỏi hoặc từ khóa tài liệu..."; }
+      if(btn) { btn.disabled = false; }
+    }
 
     async function loadHistory() {
       try {
