@@ -28,10 +28,97 @@ def switch_key():
         return True
     return False
 
+# === TỪ ĐIỂN MỞ RỘNG TỪ KHÓA (Static Mapping) ===
+TERM_MAP = {
+    "ai": ["trí tuệ nhân tạo", "artificial intelligence"],
+    "ml": ["machine learning", "học máy"],
+    "dl": ["deep learning", "học sâu"],
+    "nlp": ["natural language processing", "xử lý ngôn ngữ tự nhiên"],
+    "cv": ["computer vision", "thị giác máy tính"],
+    "iot": ["internet of things", "internet vạn vật"],
+    "cntt": ["công nghệ thông tin", "information technology"],
+    "csdl": ["cơ sở dữ liệu", "database"],
+    "oop": ["lập trình hướng đối tượng", "object oriented programming"],
+    "uml": ["unified modeling language"],
+    "erp": ["enterprise resource planning", "hoạch định tài nguyên doanh nghiệp"],
+    "plc": ["programmable logic controller", "bộ điều khiển lập trình"],
+    "cad": ["computer aided design", "thiết kế có sự hỗ trợ của máy tính"],
+    "cam": ["computer aided manufacturing"],
+    "cnc": ["computer numerical control", "điều khiển số"],
+    "bim": ["building information modeling"],
+    "gis": ["geographic information system", "hệ thống thông tin địa lý"],
+    "5g": ["fifth generation", "mạng 5G"],
+    "blockchain": ["chuỗi khối", "công nghệ blockchain"],
+    "big data": ["dữ liệu lớn"],
+    "data science": ["khoa học dữ liệu"],
+    "cloud computing": ["điện toán đám mây"],
+    "cyber security": ["an ninh mạng", "an toàn thông tin"],
+    "robotics": ["robot học", "kỹ thuật robot"],
+    "embedded": ["hệ thống nhúng", "embedded system"],
+    "fpga": ["field programmable gate array"],
+    "vi điều khiển": ["microcontroller", "vi xử lý"],
+    "trí tuệ nhân tạo": ["artificial intelligence", "AI"],
+    "học máy": ["machine learning"],
+    "học sâu": ["deep learning"],
+    "mạng nơ-ron": ["neural network", "mạng thần kinh nhân tạo"],
+    "xử lý ảnh": ["image processing", "computer vision"],
+    "cơ điện tử": ["mechatronics"],
+    "tự động hóa": ["automation", "điều khiển tự động"],
+    "năng lượng tái tạo": ["renewable energy"],
+    "vật liệu": ["materials science", "khoa học vật liệu"],
+    "kinh tế lượng": ["econometrics"],
+    "quản trị kinh doanh": ["business administration"],
+    "kế toán": ["accounting"],
+    "marketing": ["tiếp thị"],
+    "machine learning": ["học máy", "ML"],
+    "deep learning": ["học sâu"],
+    "artificial intelligence": ["trí tuệ nhân tạo", "AI"],
+    "natural language processing": ["xử lý ngôn ngữ tự nhiên", "NLP"],
+    "computer vision": ["thị giác máy tính"],
+    "internet of things": ["internet vạn vật", "IoT"],
+    "information technology": ["công nghệ thông tin"],
+    "database": ["cơ sở dữ liệu"],
+    "neural network": ["mạng nơ-ron", "mạng thần kinh nhân tạo"],
+    "image processing": ["xử lý ảnh"],
+    "mechatronics": ["cơ điện tử"],
+    "automation": ["tự động hóa"],
+    "renewable energy": ["năng lượng tái tạo"],
+    "data mining": ["khai phá dữ liệu"],
+    "software engineering": ["công nghệ phần mềm"],
+    "web development": ["phát triển web", "lập trình web"],
+}
+
+def expand_keywords(keyword: str) -> list[str]:
+    """Mở rộng từ khóa bằng static mapping. Trả về list các từ đồng nghĩa."""
+    if not keyword:
+        return []
+    key = keyword.lower().strip()
+    synonyms = []
+    # Tìm exact match
+    if key in TERM_MAP:
+        synonyms.extend(TERM_MAP[key])
+    # Tìm partial match — chỉ khi key đủ dài (>= 3 ký tự) và là từ con rõ ràng
+    if len(key) >= 3:
+        for term, expansions in TERM_MAP.items():
+            if term != key and len(term) >= 3:
+                # Chỉ match nếu term chứa key hoặc key chứa term, và là từ đứng riêng
+                if f" {key}" in f" {term}" or f" {term}" in f" {key}":
+                    synonyms.extend(expansions)
+    # Loại bỏ trùng lặp, giữ thứ tự
+    seen = set()
+    unique = []
+    for s in synonyms:
+        if s.lower() not in seen and s.lower() != key:
+            seen.add(s.lower())
+            unique.append(s)
+    return unique[:5]  # Tối đa 5 synonyms
+
 # Schema định dạng đầu ra của AI
 class IntentResponse(BaseModel):
     intent: str = Field(description="Phân loại ý định: 'search' (tìm sách), 'suggest' (gợi ý sách), 'faq' (thông tin thư viện), 'chat' (hỏi đáp/kiến thức chung), 'greeting' (chào hỏi)")
-    keyword: str = Field(description="Từ khóa để tìm kiếm sách chung chung (tên sách...). Để trống nếu không có.", default="")
+    keyword: str = Field(description="Từ khóa chính để tìm kiếm (tên sách, chủ đề cốt lõi). CHỈ chứa nội dung tìm kiếm, KHÔNG chứa loại tài liệu hay tên tác giả.", default="")
+    keyword_vi: str = Field(description="Bản dịch tiếng Việt của keyword nếu keyword là tiếng Anh. Để trống nếu keyword đã là tiếng Việt.", default="")
+    keyword_en: str = Field(description="Bản dịch tiếng Anh của keyword nếu keyword là tiếng Việt. Để trống nếu keyword đã là tiếng Anh.", default="")
     author: str = Field(description="Tên tác giả nếu người dùng có nhắc đến (ví dụ: viết bởi Nguyễn Văn A -> Nguyễn Văn A).", default="")
     publisher: str = Field(description="Nhà xuất bản (ví dụ: NXB Trẻ, NXB Bách khoa).", default="")
     subject: str = Field(description="Chủ đề/Thể loại tài liệu (ví dụ: Trí tuệ nhân tạo, Toán cao cấp).", default="")
@@ -92,9 +179,11 @@ Dưới đây là thông tin nội bộ của thư viện để bạn tham khả
    - Reply: Chào lại thân thiện và giới thiệu ngắn gọn khả năng của bạn.
 
 2. Tìm kiếm sách/tài liệu ("search"):
-   - Dùng khi người dùng CÓ NHU CẦU lấy danh sách sách/tài liệu (Ví dụ: "tìm sách AI", "có cuốn nào về tài chính không?").
-   - Keyword: Rút trích CHÍNH XÁC chủ đề, tên sách hoặc tác giả người dùng muốn tìm.
-   - Reply: Trả lời tự nhiên, giới thiệu ngắn gọn về chủ đề người dùng muốn tìm và dẫn dắt "Dưới đây là một số tài liệu tôi tìm thấy:". (Hệ thống sẽ tự đính kèm sách vào sau câu reply này).
+   - Dùng khi người dùng CÓ NHU CẦU lấy danh sách sách/tài liệu.
+   - **QUAN TRỌNG VỀ KEYWORD**: Chỉ đặt NỘI DUNG TÌM KIẾM vào keyword. KHÔNG gộp loại tài liệu (luận văn, đồ án, giáo trình) vào keyword → đặt vào collection.
+   - **keyword_vi**: Nếu keyword là tiếng Anh, dịch sang tiếng Việt. Ví dụ: keyword="machine learning" → keyword_vi="học máy".
+   - **keyword_en**: Nếu keyword là tiếng Việt, dịch sang tiếng Anh. Ví dụ: keyword="trí tuệ nhân tạo" → keyword_en="artificial intelligence".
+   - Reply: Giới thiệu ngắn gọn và dẫn dắt "Dưới đây là một số tài liệu tôi tìm thấy:".
 
 3. Hỏi thông tin thư viện ("faq"):
    - Dùng khi hỏi về giờ mở cửa, địa chỉ, cách làm thẻ, wifi, mượn trả sách...
@@ -108,9 +197,27 @@ Dưới đây là thông tin nội bộ của thư viện để bạn tham khả
    - Dùng khi hỏi về kiến thức, tâm sự, hoặc các câu hỏi không thuộc các loại trên.
    - Reply: Nhập vai chuyên gia, trả lời đầy đủ và trực quan.
 
+# VÍ DỤ PHÂN TÁCH (FEW-SHOT):
+
+Input: "tìm luận văn về học máy của tác giả Nguyễn Văn A năm 2022"
+→ intent="search", keyword="học máy", keyword_en="machine learning", keyword_vi="", author="Nguyễn Văn A", collection="Luận văn", year="2022"
+
+Input: "tìm sách machine learning"
+→ intent="search", keyword="machine learning", keyword_vi="học máy", keyword_en="", collection=""
+
+Input: "có đồ án tốt nghiệp nào về IoT không?"
+→ intent="search", keyword="IoT", keyword_vi="internet vạn vật", keyword_en="internet of things", collection="Đồ án tốt nghiệp"
+
+Input: "tìm giáo trình toán cao cấp"
+→ intent="search", keyword="toán cao cấp", keyword_en="advanced mathematics", keyword_vi="", collection="Giáo trình"
+
+Input: "sách về AI viết bằng tiếng anh"
+→ intent="search", keyword="AI", keyword_vi="trí tuệ nhân tạo", keyword_en="artificial intelligence", language="tiếng anh"
+
 # QUAN TRỌNG:
 - Bạn LUÔN tuân thủ đúng định dạng JSON được yêu cầu.
 - Nếu câu hỏi không thể trả lời hoặc vô nghĩa, chọn "chat" và xin lỗi lịch sự.
+- LUÔN cung cấp keyword_vi hoặc keyword_en (bản dịch song ngữ) khi intent là "search".
 """
 
 def build_messages(text: str, chat_history: list = None) -> list:
@@ -149,22 +256,27 @@ def fallback_intent(text: str) -> dict:
 
     if any(trigger in text_lower for trigger in ["tìm", "sách về", "tài liệu"]):
         keyword = re.sub(r"^(tìm|sách về|tài liệu về)\s+", "", text_lower)
-        return {"intent": "search", "keyword": keyword or text, "author": "", "publisher": "", "subject": "", "collection": "", "year": "", "language": "", "answer": f"Đang tìm kiếm tài liệu về '{keyword or text}'..."}
+        kw = keyword or text
+        synonyms = expand_keywords(kw)
+        return {
+            "intent": "search", "keyword": kw,
+            "keyword_vi": "", "keyword_en": "",
+            "synonyms": synonyms,
+            "author": "", "publisher": "", "subject": "",
+            "collection": "", "year": "", "language": "",
+            "answer": f"Đang tìm kiếm tài liệu về '{kw}'..."
+        }
 
     return {
         "intent": "chat", 
-        "keyword": "",
-        "author": "",
-        "publisher": "",
-        "subject": "",
-        "collection": "",
-        "year": "",
-        "language": "",
+        "keyword": "", "keyword_vi": "", "keyword_en": "", "synonyms": [],
+        "author": "", "publisher": "", "subject": "",
+        "collection": "", "year": "", "language": "",
         "answer": "⚠️ Xin lỗi, hệ thống AI đang bảo trì. Tuy nhiên, bạn vẫn có thể dùng các lệnh như:\n• *tìm sách [tên sách]*\n• *giờ mở cửa*\n• *làm thẻ thư viện*"
     }
 
-def detect_intent(text: str, chat_history: list = None) -> dict:
-    """Xác định ý định với Gemini Structured Output & System Instruction."""
+async def detect_intent(text: str, chat_history: list = None) -> dict:
+    """Xác định ý định với Gemini Structured Output & System Instruction (Async)."""
     max_retries = len(API_KEYS)
     for attempt in range(max_retries):
         client = get_client()
@@ -175,7 +287,7 @@ def detect_intent(text: str, chat_history: list = None) -> dict:
             messages = build_messages(text, chat_history)
 
             # Bước 1: Phân loại Ý định (Cần JSON, KHÔNG được bật Google Search cùng lúc)
-            response = client.models.generate_content(
+            response = await client.aio.models.generate_content(
                 model='gemini-2.5-flash',
                 contents=messages,
                 config=types.GenerateContentConfig(
@@ -192,6 +304,8 @@ def detect_intent(text: str, chat_history: list = None) -> dict:
                 result = json.loads(raw_text)
                 intent = result.get("intent", "chat")
                 keyword = result.get("keyword", "")
+                keyword_vi = result.get("keyword_vi", "")
+                keyword_en = result.get("keyword_en", "")
                 author = result.get("author", "")
                 publisher = result.get("publisher", "")
                 subject = result.get("subject", "")
@@ -199,11 +313,20 @@ def detect_intent(text: str, chat_history: list = None) -> dict:
                 year = result.get("year", "")
                 language = result.get("language", "")
                 answer = result.get("reply", "Tôi có thể giúp gì cho bạn?")
+
+                # Mở rộng từ khóa bằng static mapping
+                synonyms = expand_keywords(keyword)
+                # Bổ sung keyword song ngữ từ AI vào synonyms nếu chưa có
+                for kw in [keyword_vi, keyword_en]:
+                    if kw and kw.lower() not in [s.lower() for s in synonyms] and kw.lower() != keyword.lower():
+                        synonyms.insert(0, kw)
+                
+                print(f"🔍 Intent: {intent} | Keyword: {keyword} | VI: {keyword_vi} | EN: {keyword_en} | Synonyms: {synonyms}")
                 
                 # Bước 2: Nếu cần trả lời thông tin (faq/chat), kích hoạt Google Search Grounding riêng biệt
                 if intent in ["faq", "chat"]:
                     try:
-                        grounded_response = client.models.generate_content(
+                        grounded_response = await client.aio.models.generate_content(
                             model='gemini-2.5-flash',
                             contents=f"Dựa trên tìm kiếm thời gian thực, hãy trả lời câu hỏi sau một cách chi tiết và chính xác nhất (ưu tiên thông tin về thư viện Đại học Bách khoa Hà Nội - HUST nếu có): {text}",
                             config=types.GenerateContentConfig(
@@ -219,6 +342,9 @@ def detect_intent(text: str, chat_history: list = None) -> dict:
                 return {
                     "intent": intent,
                     "keyword": keyword,
+                    "keyword_vi": keyword_vi,
+                    "keyword_en": keyword_en,
+                    "synonyms": synonyms,
                     "author": author,
                     "publisher": publisher,
                     "subject": subject,
@@ -243,8 +369,8 @@ def detect_intent(text: str, chat_history: list = None) -> dict:
     # Nếu tất cả các keys đều lỗi hoặc AI lỗi chung
     return fallback_intent(text)
 
-def summarize_books(keyword: str, books: list) -> str:
-    """Sử dụng AI để tóm tắt 2-3 tài liệu đầu tiên tìm được."""
+async def summarize_books(keyword: str, books: list) -> str:
+    """Sử dụng AI để tóm tắt 2-3 tài liệu đầu tiên tìm được (Async)."""
     if not books:
         return f"Rất tiếc, tôi không tìm thấy tài liệu nào về '{keyword}'."
         
@@ -260,7 +386,7 @@ def summarize_books(keyword: str, books: list) -> str:
     prompt = f"Bạn là một thủ thư thư viện thông minh. Người dùng vừa tìm kiếm từ khóa '{keyword}'. Dưới đây là top {len(books[:3])} tài liệu hàng đầu:\n{context}\nViết 1 đoạn văn ngắn gọn (tối đa 3 dòng) bằng tiếng Việt để giới thiệu khái quát nội dung nổi bật của các cuốn sách này thật hấp dẫn. KHÔNG LIỆT KÊ LẠI TIÊU ĐỀ SÁCH VÀ TÁC GIẢ vì chúng tôi đã hiển thị trên giao diện rồi."
     
     try:
-        response = client.models.generate_content(
+        response = await client.aio.models.generate_content(
             model='gemini-2.5-flash',
             contents=prompt,
             config=types.GenerateContentConfig(temperature=0.5)

@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from services.nlp import detect_intent, summarize_books
 from services.dspace_client import search_documents, get_books_by_subject
-from services.history_client import save_search, get_favorite_subject, save_chat_message, get_chat_history
+from services.history_client import save_search, get_favorite_subject, save_chat_message, get_chat_history, get_stats
 import uvicorn
 
 app = FastAPI(title="SmartLib AI Backend")
@@ -39,7 +39,7 @@ async def chat(req: ChatRequest):
     try:
         # Lấy lịch sử trò chuyện để AI có ngữ cảnh
         chat_history = get_chat_history(req.session_id)
-        result = detect_intent(req.message, chat_history)
+        result = await detect_intent(req.message, chat_history)
         intent = result["intent"]
 
         response_data = None
@@ -67,11 +67,12 @@ async def chat(req: ChatRequest):
             collection = result.get("collection", "")
             year = result.get("year", "")
             language = result.get("language", "")
+            synonyms = result.get("synonyms", [])
 
             if not any([keyword, author, publisher, subject, collection, year, language]):
                 keyword = req.message
 
-            books = search_documents(
+            books = await search_documents(
                 keyword=keyword,
                 author=author,
                 publisher=publisher,
@@ -79,7 +80,8 @@ async def chat(req: ChatRequest):
                 collection=collection,
                 year=year,
                 language=language,
-                size=6
+                size=6,
+                synonyms=synonyms
             )
 
             if not books:
@@ -96,7 +98,7 @@ async def chat(req: ChatRequest):
                 # Sử dụng câu trả lời giải thích từ AI nếu có hoặc tóm tắt AI
                 ai_text = result.get("answer")
                 if not ai_text or ai_text.startswith("Đang tìm kiếm") or ai_text == "Tôi có thể giúp gì cho bạn?":
-                    display_text = summarize_books(keyword or req.message, books)
+                    display_text = await summarize_books(keyword or req.message, books)
                 else:
                     display_text = ai_text
 
@@ -116,7 +118,7 @@ async def chat(req: ChatRequest):
                     text="💬 Bạn chưa có lịch sử tìm kiếm. Hãy tìm vài tài liệu trước để tôi gợi ý cho bạn nhé!"
                 )
             else:
-                books = get_books_by_subject(subject, size=3)
+                books = await get_books_by_subject(subject, size=3)
                 # Sử dụng câu trả lời giải thích từ AI nếu có
                 ai_text = result.get("answer")
                 display_text = ai_text if ai_text else f"✨ Dựa trên lịch sử của bạn, tôi gợi ý tài liệu về chủ đề **\"{subject}\"**:"
@@ -161,7 +163,7 @@ class BotStarRequest(BaseModel):
 async def botstar_search(req: BotStarRequest):
     """Endpoint chuyên dụng hỗ trợ BotStar gọi API tìm sách."""
     # Nhờ AI phân tích intent và rút trích từ khóa
-    result = detect_intent(req.query)
+    result = await detect_intent(req.query)
     intent = result.get("intent")
     
     if intent == "search":
@@ -172,11 +174,12 @@ async def botstar_search(req: BotStarRequest):
         collection = result.get("collection", "")
         year = result.get("year", "")
         language = result.get("language", "")
+        synonyms = result.get("synonyms", [])
 
         if not any([keyword, author, publisher, subject, collection, year, language]):
             keyword = req.query
 
-        books = search_documents(
+        books = await search_documents(
             keyword=keyword,
             author=author,
             publisher=publisher,
@@ -184,7 +187,8 @@ async def botstar_search(req: BotStarRequest):
             collection=collection,
             year=year,
             language=language,
-            size=3
+            size=3,
+            synonyms=synonyms
         ) # Lấy top 3 cuốn chất lượng
         
         if not books:
@@ -220,6 +224,20 @@ async def botstar_search(req: BotStarRequest):
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "SmartLib AI"}
+
+
+@app.get("/stats")
+def stats():
+    """Endpoint monitor: trạng thái cache và bộ nhớ."""
+    from services.dspace_client import _search_cache
+    return {
+        "session": get_stats(),
+        "search_cache": {
+            "cached_queries": len(_search_cache),
+            "max_queries": _search_cache.maxsize,
+            "ttl_seconds": _search_cache.ttl,
+        }
+    }
 
 
 if __name__ == "__main__":
