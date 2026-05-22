@@ -15,7 +15,6 @@ API_KEYS = [k.strip() for k in keys_raw.split(",") if k.strip()]
 current_key_index = 0
 
 def get_client():
-    global current_key_index
     if not API_KEYS:
         return None
     return genai.Client(api_key=API_KEYS[current_key_index])
