@@ -85,9 +85,10 @@ async def chat(req: ChatRequest):
             )
 
             if not books:
+                dlib_search_url = f"https://dlib.hust.edu.vn/discover?query={keyword}"
                 response_data = ChatResponse(
                     type="text",
-                    text=f"😔 Xin lỗi, tôi không tìm thấy tài liệu nào về **\"{keyword}\"**.\nBạn thử từ khóa khác nhé!"
+                    text=f"😔 Xin lỗi, hệ thống không tìm thấy tài liệu nào về **\"{keyword}\"**.\n\n🌐 Bạn có thể thử tìm kiếm trực tiếp trên cổng tài liệu số của thư viện tại đây: [Truy cập dlib.hust.edu.vn]({dlib_search_url})"
                 )
             else:
                 # Lưu chủ đề vào lịch sử
@@ -160,7 +161,7 @@ async def chat(req: ChatRequest):
         print(f"❌ Lỗi xử lý chat: {e}")
         return ChatResponse(
             type="text",
-            text=f"⚙️ Đã xảy ra lỗi hệ thống: {str(e)}. Vui lòng kiểm tra lại cấu hình Backend/API Key."
+            text=f"⚙️ Hệ thống đang gặp sự cố và không thể trả lời ngay lúc này.\n\n🌐 Bạn có thể tra cứu thông tin và tài liệu trực tiếp trên trang web của Thư viện Tạ Quang Bửu tại: [dlib.hust.edu.vn](https://dlib.hust.edu.vn/)"
         )
 
 
