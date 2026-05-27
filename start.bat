@@ -6,7 +6,8 @@ echo ============================================
 cd /d D:\SmartLib\backend
 
 echo [1/2] Kiem tra va cai dat thu vien Python...
-pip install -r requirements.txt -q
+REM pip install -r requirements.txt -q
+echo (Da bo qua buoc cai dat thu vien de tang toc do khoi dong. Chay 'pip install -r requirements.txt' neu ban can cap nhat thu vien)
 
 echo [2/2] Khoi dong Backend Server (port 8001)...
 echo.

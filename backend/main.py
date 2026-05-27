@@ -118,7 +118,18 @@ async def chat(req: ChatRequest):
                     text="💬 Bạn chưa có lịch sử tìm kiếm. Hãy tìm vài tài liệu trước để tôi gợi ý cho bạn nhé!"
                 )
             else:
-                books = await get_books_by_subject(subject, size=3)
+                from services.recommender import get_local_suggestions
+                books = get_local_suggestions(subject, size=3)
+                
+                # Nếu local không đủ kết quả, gọi thêm API để bù vào
+                if len(books) < 3:
+                    needed = 3 - len(books)
+                    api_books = await get_books_by_subject(subject, size=needed)
+                    existing_urls = {b.get("url") for b in books}
+                    for ab in api_books:
+                        if ab.get("url") not in existing_urls:
+                            books.append(ab)
+
                 # Sử dụng câu trả lời giải thích từ AI nếu có
                 ai_text = result.get("answer")
                 display_text = ai_text if ai_text else f"✨ Dựa trên lịch sử của bạn, tôi gợi ý tài liệu về chủ đề **\"{subject}\"**:"

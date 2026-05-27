@@ -124,7 +124,7 @@ class IntentResponse(BaseModel):
     collection: str = Field(description="Bộ sưu tập/Loại tài liệu (ví dụ: Luận văn, Đồ án tốt nghiệp, Giáo trình).", default="")
     year: str = Field(description="Năm xuất bản nếu có nhắc đến (ví dụ: 2023, 2024).", default="")
     language: str = Field(description="Ngôn ngữ tài liệu nếu có nhắc đến (ví dụ: tiếng anh, tiếng việt, english).", default="")
-    reply: str = Field(description="Câu trả lời của AI dành cho người dùng. Dùng ngôn ngữ tự nhiên, thân thiện và chi tiết. Hướng dẫn từng bước nếu là 'faq'.")
+    reply: str = Field(description="Câu trả lời của AI dành cho người dùng. Dùng ngôn ngữ tự nhiên, thân thiện, và cực kỳ ngắn gọn súc tích. Tránh dài dòng.")
 
 # --- Thêm thông tin nội bộ (Context) cho Thư viện ---
 FAQ_CONTEXT = """
@@ -167,6 +167,7 @@ FAQ_CONTEXT = """
 SYSTEM_INSTRUCTION = f"""
 Bạn là SmartLib AI, trợ lý ảo thông minh, thân thiện và hiểu biết của thư viện Tạ Quang Bửu (Đại học Bách khoa Hà Nội - HUST).
 Nhiệm vụ của bạn là đọc hiểu tin nhắn của người dùng, xác định ý định (intent), trích xuất từ khóa (nếu có) và tạo câu trả lời phù hợp nhất.
+YÊU CẦU QUAN TRỌNG: Câu trả lời (reply) phải cực kỳ NGẮN GỌN, súc tích, đi thẳng vào vấn đề, không giải thích dài dòng. Dưới 3 câu nếu có thể.
 
 Dưới đây là thông tin nội bộ của thư viện để bạn tham khảo khi trả lời:
 {FAQ_CONTEXT}
@@ -322,12 +323,12 @@ async def detect_intent(text: str, chat_history: list = None) -> dict:
                 
                 print(f"🔍 Intent: {intent} | Keyword: {keyword} | VI: {keyword_vi} | EN: {keyword_en} | Synonyms: {synonyms}")
                 
-                # Bước 2: Nếu cần trả lời thông tin (faq/chat), kích hoạt Google Search Grounding riêng biệt
-                if intent in ["faq", "chat"]:
+                # Bước 2: Nếu cần trả lời thông tin (chat), kích hoạt Google Search Grounding riêng biệt
+                if intent == "chat":
                     try:
                         grounded_response = await client.aio.models.generate_content(
                             model='gemini-2.5-flash',
-                            contents=f"Dựa trên tìm kiếm thời gian thực, hãy trả lời câu hỏi sau một cách chi tiết và chính xác nhất (ưu tiên thông tin về thư viện Đại học Bách khoa Hà Nội - HUST nếu có): {text}",
+                            contents=f"Dựa trên tìm kiếm thời gian thực, hãy trả lời câu hỏi sau cực kỳ ngắn gọn (TỐI ĐA 1-2 CÂU, KHÔNG DÀI DÒNG): {text}",
                             config=types.GenerateContentConfig(
                                 temperature=0.5,
                                 tools=[types.Tool(google_search=types.GoogleSearch())]
